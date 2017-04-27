@@ -1,0 +1,19 @@
+{
+  "name": "jmswick-firewall_wrap",
+  "version": "0.1.0",
+  "author": "jmswick",
+  "summary": "Wrapper module for the Puppet Labs Firewall module for use by Hiera.",
+  "license": "Apache-2.0",
+  "source": "",
+  "project_page": null,
+  "issues_url": null,
+  "requirements" : [
+    {"name": "puppet", "version_requirement": ">= 4.0.0 < 5.0.0"}
+  ],
+  "dependencies": [
+    {"name":"puppetlabs-stdlib","version_requirement":">= 4.0.0"},
+    {"name":"puppetlabs-firewall","version_requirement":">= 1.0.0"}
+  ],
+  "data_provider": null
+}
+
