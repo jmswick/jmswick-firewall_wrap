@@ -43,10 +43,10 @@
 # Copyright 2017 Your name here, unless otherwise noted.
 #
 class firewall_wrap (
-  $purge_firewall = true,
+  $purge_firewall      = true,
   $purge_firewallchain = true,
-  $firewall = {},
-  $firewallchain = {},
+  $firewall            = {},
+  $firewallchain       = {},
 ) {
   #Parameter Validation
   validate_bool($purge_firewall)
