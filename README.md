@@ -31,35 +31,89 @@ Firewall module from Puppet Labs.
 
 ### Beginning with firewall_wrap
 
-The very basic steps needed for a user to get the module up and running. This
-can include setup steps, if necessary, or it can be an example of the most
-basic use of the module.
+The default stance of this module is to purge unmanaged firewall rules and chains
+as a result, it is essential to define the default iptables changes for your OS.
 
 ## Usage
 
-This section is where you describe how to customize, configure, and do the
-fancy stuff with your module here. It's especially helpful if you include usage
-examples and code samples for doing things with your module.
+Here is an example of how to get started with the firewall_wrap module in hiera,
+using a couple of levels:
+
+common.yaml:
+```
+classes:
+  - firewall_wrap
+
+lookup_options:
+  classes:
+    merge: unique
+  '^firewall_wrap::(.*)$':
+    merge: deep
+
+firewall_wrap::firewall:
+  #IPv4
+  '000 accept all icmp':
+    proto: 'icmp'
+    action: 'accept'
+  '001 accept all to lo interface':
+    proto: 'all'
+    iniface: 'lo'
+    action: 'accept'
+  '002 reject local traffic not on loopback interface':
+    iniface: '! lo'
+    proto: 'all'
+    destination: '127.0.0.1/8'
+    action: 'reject'
+  '003 accept related established rules':
+    proto: 'all'
+    state: ['RELATED', 'ESTABLISHED']
+    action: 'accept'
+  '998 Log drops':
+    jump: 'LOG'
+    log_level: '6'
+    log_prefix: 'iptables: '
+    proto: 'all'
+  '999 drop all':
+    proto: 'all'
+    action: 'drop'
+```
+
+os\RedHat.yaml:
+```
+firewall_wrap::firewallchain:
+  'INPUT:filter:IPv4':
+    policy: accept
+  'OUTPUT:filter:IPv4':
+    policy: accept
+  'FORWARD:filter:IPv4':
+    policy: drop
+```
+
+Depending on the specific release version, there may be other default chains that
+you have to add to prevent Puppet from trying to purge a built-in chain that can't
+be removed.
+
+Also, since the firewall module manages iptables and not firewalld on newer Linux
+distributions, you may choose to also remove the firewalld packages with my
+"vpackages" module:
+
+```
+vpackages::packages:
+  firewalld:
+    ensure: absent
+
+vpackages::realize_packages:
+  - firewalld
+```
 
 ## Reference
 
-Here, include a complete list of your module's classes, types, providers,
-facts, along with the parameters for each. Users refer to this section (thus
-the name "Reference") to find specific details; most users don't read it per
-se.
+Please refer to the official Puppet Labs documentation for the Firewall module for
+the proper usage of it.  This just provides an opinionated way to interact with it
+fully within hiera.
 
 ## Limitations
 
-This is where you list OS compatibility, version compatibility, etc. If there
-are Known Issues, you might want to include them under their own heading here.
+This module should work with any OS supported by the official Puppet Labs firewall
+module.  However, it has only been tested on Red Hat Enterprise Linux.
 
-## Development
-
-Since your module is awesome, other users will want to play with it. Let them
-know what the ground rules for contributing are.
-
-## Release Notes/Contributors/Etc. **Optional**
-
-If you aren't using changelog, put your release notes here (though you should
-consider using changelog). You can also add any additional sections you feel
-are necessary or important to include here. Please use the `## ` header.
